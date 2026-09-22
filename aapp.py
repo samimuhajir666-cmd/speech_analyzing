@@ -3,28 +3,34 @@ import av
 import streamlit as st
 import numpy as np 
 from streamlit_mic_recorder import mic_recorder
-from scipy.fft import rfft,rfftfreq
-# speech parameters working 
+from scipy.fft import rfft, rfftfreq
+
+# 1. Decode Audio Function (Fixed Typo & Buffer Handling)
 def decode_audio(audio_bytes):
     container = av.open(io.BytesIO(audio_bytes))
     stream = container.streams.audio[0]
     sr = stream.rate
+    
     frames = [frame.to_ndarray() for frame in container.decode(stream)]
+    if not frames:
+        return sr, np.array([], dtype=np.int16)
+        
     audio_data = np.concatenate(frames, axis=1)
 
+    # Stereo ko Mono mein convert karna (Typo fixed here: sudio_data -> audio_data)
     if audio_data.shape[0] > 1:
-        audio_data = np.mean (sudio_data,axis=0)
+        audio_data = np.mean(audio_data, axis=0)
     else:
         audio_data = audio_data[0]
-#np.clip(..., -32768, 32767) ka matlab hai: Agar multiplication ke baad koi
-# value 32767 se badi ho j aye y a -32768 se     chhoti ho jaye, to use pakad kar boundary ke andar 
-#limit kar do. Is se au dio crack/distort hone se bach jaati hai.
+
+    # Scaling float values to Int16
     if np.issubdtype(audio_data.dtype, np.floating):
         audio_data = np.clip(audio_data * 32767, -32768, 32767).astype(np.int16)
-    return sr,audio_data
+        
+    return sr, audio_data
 
 
-#speech_parameters:-
+# 2. Speech Parameters Calculation
 def speech_parameters(audio_data, sr):
     if len(audio_data) == 0:
         return {}
@@ -62,6 +68,7 @@ def speech_parameters(audio_data, sr):
         "Loudness Fluctuation": round(float(shimmer), 4)
     }
 
+
 # 3. Streamlit Interface
 st.title("🎤 Voice Recorder & Diagnostic Parameters")
 
@@ -72,7 +79,8 @@ audio = mic_recorder(
 )
 
 if audio and audio.get('bytes'):
-    st.audio(audio['bytes'], format='audio/wav')
+    # Player format fixed to webm (jo recorder send karta hai)
+    st.audio(audio['bytes'], format='audio/webm')
     
     sr, audio_data = decode_audio(audio['bytes'])
     params = speech_parameters(audio_data, sr)
@@ -85,6 +93,5 @@ if audio and audio.get('bytes'):
         col3.metric("Noise (ZCR)", params['zcr'])
 
         col4, col5 = st.columns(2)
-        col4.metric("instability", params['instability'])
-        col5.metric("Loudness Fluctuation", params['Loudness Fluctuation'])
-        
+        col4.metric("Instability (Jitter)", params['instability'])
+        col5.metric("Loudness Fluctuation (Shimmer)", params['Loudness Fluctuation'])
