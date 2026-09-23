@@ -121,7 +121,7 @@ if audio and audio.get('bytes'):
             
             updated_df = pd.concat([existing_df, new_row], ignore_index=True)
             conn.update(data=updated_df)
-            st.success(f"✅ {current_tc} Google Sheet mein save ho gaya!")
+            st.success(f"✅ {current_tc} saved on google spread sheets !")
             st.rerun()
 
 # Sidebar Data Preview
@@ -129,4 +129,4 @@ st.sidebar.subheader("📁 Live Google Sheet Data")
 if not existing_df.empty:
     st.sidebar.dataframe(existing_df)
 else:
-    st.sidebar.info("Data load ho raha hai...")
+    st.sidebar.info("data is loading ...")
