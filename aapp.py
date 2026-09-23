@@ -7,7 +7,7 @@ from streamlit_mic_recorder import mic_recorder
 from scipy.fft import rfft, rfftfreq
 from streamlit_gsheets import GSheetsConnection
 
-st.set_page_config(page_title="Voice Diagnostic Tool", page_icon="🎤")
+st.set_page_config(page_title="Analyzing Speech parameters", page_icon="🎤")
 
 # 1. Google Sheets Connection Initialize
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -68,7 +68,7 @@ def speech_parameters(audio_data, sr):
     }
 
 # Streamlit Interface
-st.title("🎤 Voice Recorder & Diagnostic Parameters")
+st.title("🎤 Voice Recorder X Analyzing speech parameters")
 
 # Fetch existing Google Sheet data
 try:
