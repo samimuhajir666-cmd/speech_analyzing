@@ -5,3 +5,4 @@ numpy
 scipy
 openai-whisper
 pandas
+st-gsheets-connection
